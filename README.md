@@ -2,9 +2,7 @@
 
 A macOS menu bar app that displays your Claude Code usage costs in real-time.
 
-<div align="center">
-  <img src="docs/screenshot.png" alt="CCUsageMac Screenshot" width="400">
-</div>
+![](./docs/image.png)
 
 ## Overview
 
@@ -130,6 +128,3 @@ MIT License - see [LICENSE](LICENSE) file for details
 - [ccusage](https://github.com/ryoppippi/ccusage) - CLI version with more features
 - [Claude Code](https://claude.ai/code) - The AI coding assistant
 
----
-
-Made with ❤️ for the Claude Code community
