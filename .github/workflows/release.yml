@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: '5.9'
+    
+    - name: Import certificates
+      env:
+        BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+        # Create variables
+        CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        
+        # Import certificate from secrets
+        echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+        
+        # Create temporary keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        
+        # Import certificate to keychain
+        security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+    
+    - name: Build and sign app
+      env:
+        DEVELOPER_ID: ${{ secrets.DEVELOPER_ID }}
+      run: |
+        make build
+        # Update Makefile with actual Developer ID
+        sed -i '' "s/DEVELOPER_ID = .*/DEVELOPER_ID = \"$DEVELOPER_ID\"/" Makefile
+        make sign
+    
+    - name: Create DMG
+      run: make dmg
+    
+    - name: Notarize app
+      env:
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        TEAM_ID: ${{ secrets.TEAM_ID }}
+        NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+      run: |
+        # Store notarization credentials
+        xcrun notarytool store-credentials "notarytool-profile" \
+          --apple-id "$APPLE_ID" \
+          --team-id "$TEAM_ID" \
+          --password "$NOTARIZATION_PASSWORD"
+        
+        # Notarize
+        xcrun notarytool submit release/CCUsageMac-*.dmg \
+          --keychain-profile "notarytool-profile" \
+          --wait
+        
+        # Staple
+        xcrun stapler staple release/CCUsageMac-*.dmg
+    
+    - name: Calculate SHA256
+      id: sha256
+      run: |
+        SHA256=$(shasum -a 256 release/CCUsageMac-*.dmg | cut -d' ' -f1)
+        echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+        echo "SHA256: $SHA256"
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Changes
+          - See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+          
+          ## Installation
+          
+          ### Homebrew
+          ```bash
+          brew install --cask ccusage-mac
+          ```
+          
+          ### Manual
+          Download the DMG file below and drag CCUsageMac.app to your Applications folder.
+          
+          **SHA256:** `${{ steps.sha256.outputs.sha256 }}`
+        draft: false
+        prerelease: false
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/CCUsageMac-${{ github.ref_name }}.dmg
+        asset_name: CCUsageMac-${{ github.ref_name }}.dmg
+        asset_content_type: application/x-apple-diskimage
+    
+    - name: Update Homebrew Formula
+      run: |
+        # Update SHA256 in formula
+        sed -i '' "s/sha256 \".*\"/sha256 \"${{ steps.sha256.outputs.sha256 }}\"/" homebrew/ccusage-mac.rb
+        
+        # Commit and push to a new branch
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git checkout -b update-formula-${{ github.ref_name }}
+        git add homebrew/ccusage-mac.rb
+        git commit -m "Update formula for version ${{ github.ref_name }}"
+        git push origin update-formula-${{ github.ref_name }}
+        
+        # Create PR to homebrew-cask repo (manual step needed)

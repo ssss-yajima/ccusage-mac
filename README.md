@@ -47,11 +47,13 @@ swift build -c release
 1. Copy the built binary to your Applications folder
 2. To launch at login: System Settings > General > Login Items
 
-### Homebrew (Coming Soon)
+### Homebrew Cask
 
 ```bash
 brew install --cask ccusage-mac
 ```
+
+*Note: Homebrew installation requires the formula to be accepted into the official Homebrew Cask repository. For now, please build from source or download from GitHub Releases.*
 
 ## Usage
 
