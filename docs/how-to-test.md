@@ -1,95 +1,95 @@
-# CCUsageMac 動作確認手順
+# CCUsageMac Testing Guide
 
-## 1. アプリケーションの起動
+## 1. Starting the Application
 
-### コマンドラインから起動
+### Launch from Command Line
 ```bash
 cd CCUsageMac
 .build/release/CCUsageMac
 ```
 
-### Finderから起動（推奨）
-1. Finderで `CCUsageMac/.build/release/` を開く
-2. `CCUsageMac` をダブルクリック
-3. 初回起動時は「開発元を検証できないため開けません」と表示される場合があります
-   - システム設定 > プライバシーとセキュリティ > セキュリティ
-   - 「"CCUsageMac"は開発元を確認できないため、使用がブロックされました」の横の「このまま開く」をクリック
+### Launch from Finder (Recommended)
+1. Open `CCUsageMac/.build/release/` in Finder
+2. Double-click `CCUsageMac`
+3. On first launch, you may see "Cannot be opened because the developer cannot be verified"
+   - Go to System Settings > Privacy & Security > Security
+   - Click "Open Anyway" next to ""CCUsageMac" was blocked from use because it is not from an identified developer"
 
-## 2. 動作確認ポイント
+## 2. Verification Points
 
-### メニューバーの確認
-1. 画面上部のメニューバーに脳のアイコン（🧠）と金額が表示されることを確認
-2. 初回起動時は「$0.00」または「$--」と表示される可能性があります
+### Menu Bar Check
+1. Verify that a brain icon (🧠) and cost amount appear in the menu bar at the top of the screen
+2. Initial launch may show "$0.00" or "$--"
 
-### Claude Codeのデータ確認
-アプリが正しく動作するには、Claude Codeの使用履歴が必要です：
+### Claude Code Data Verification
+The app requires Claude Code usage history to function properly:
 
 ```bash
-# Claude Codeのデータディレクトリを確認
+# Check Claude Code data directory
 ls -la ~/.claude/projects/
 ```
 
-データがない場合は、Claude Codeを使用してから再度確認してください。
+If no data exists, use Claude Code first, then check again.
 
-### 詳細表示の確認
-1. メニューバーのアイコンをクリック
-2. ポップオーバーウィンドウが表示されることを確認
-3. 以下の情報が表示されます：
-   - Total Cost（今日の合計使用料金）
-   - Token Usage（トークン使用量の内訳）
-   - Models Used（使用したモデル）
-   - 最終更新時刻
+### Detail View Verification
+1. Click the menu bar icon
+2. Verify that a popover window appears
+3. The following information should be displayed:
+   - Total Cost (today's total usage cost)
+   - Token Usage (breakdown of token usage)
+   - Models Used (models utilized)
+   - Last updated time
 
-### 更新機能の確認
-1. ポップオーバー右上の更新ボタン（🔄）をクリック
-2. データが再読み込みされることを確認
-3. 自動更新は5分ごとに実行されます
+### Refresh Functionality
+1. Click the refresh button (🔄) in the top right of the popover
+2. Verify that data is reloaded
+3. Auto-refresh occurs every 5 minutes
 
-## 3. トラブルシューティング
+## 3. Troubleshooting
 
-### 金額がccusageと異なる場合
-- CCUsageMacは、ローカルタイムゾーン（日本時間）での「今日」のデータを集計します
-- JSONLファイルのタイムスタンプはUTC形式のため、日付の境界で若干の差異が生じる可能性があります
-- より正確な日別集計が必要な場合は、ccusageコマンドラインツールの使用を推奨します
+### When Cost Differs from ccusage
+- CCUsageMac aggregates "today's" data in local timezone (e.g., Japan time)
+- JSONL file timestamps are in UTC format, which may cause slight differences at date boundaries
+- For more accurate daily aggregation, consider using the ccusage command-line tool
 
-### 「$--」と表示される場合
-- エラーが発生しています。ポップオーバーを開いてエラー内容を確認してください
-- よくある原因：
-  - Claude Codeがインストールされていない
-  - `~/.claude/projects/` ディレクトリが存在しない
-  - 今日のデータがまだない
+### When "$--" is Displayed
+- An error has occurred. Open the popover to check the error details
+- Common causes:
+  - Claude Code is not installed
+  - `~/.claude/projects/` directory doesn't exist
+  - No data for today yet
 
-### アプリが起動しない場合
+### When App Won't Launch
 ```bash
-# 直接実行してエラーを確認
+# Run directly to check for errors
 ./CCUsageMac/.build/release/CCUsageMac
 ```
 
-### データが更新されない場合
-1. Claude Codeで何か作業を行う
-2. 手動で更新ボタンをクリック
-3. それでも更新されない場合は、アプリを再起動
+### When Data Doesn't Update
+1. Do some work in Claude Code
+2. Click the manual refresh button
+3. If still not updating, restart the app
 
-### アプリを終了する方法
-1. ポップオーバーを開く
-2. 右下の「Quit」ボタンをクリック
+### How to Quit the App
+1. Open the popover
+2. Click the "Quit" button in the bottom right
 
-## 4. ログの確認
+## 4. Checking Logs
 
-問題が発生した場合、コンソールアプリでログを確認：
+If problems occur, check logs in Console app:
 
-1. アプリケーション > ユーティリティ > コンソール.app を開く
-2. 左側のリストから自分のMacを選択
-3. 検索欄に「CCUsageMac」と入力
-4. エラーメッセージを確認
+1. Open Applications > Utilities > Console.app
+2. Select your Mac from the left sidebar
+3. Enter "CCUsageMac" in the search field
+4. Review error messages
 
-## 5. アンインストール
+## 5. Uninstalling
 
-アプリを削除する場合：
+To remove the app:
 ```bash
-# プロセスを終了
+# Terminate the process
 pkill CCUsageMac
 
-# ファイルを削除（ビルドしたバイナリのみの場合）
+# Remove files (for built binary only)
 rm CCUsageMac/.build/release/CCUsageMac
 ```

@@ -1,83 +1,48 @@
 # CLAUDE.md
 
-https://github.com/ryoppippi/ccusage
-`npx ccusage@latest` コマンド相当の情報をMacの通知バーに表示するアプリです。
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-参考：
+## Project Overview
+
+CCUsageMac is a macOS menu bar application that displays Claude Code usage costs in real-time, equivalent to the `npx ccusage@latest` command.
+
+Reference output:
 ```
 ┌──────────────┬──────────────────────────────────────┬──────────────┬──────────────┬──────────────┬──────────────┬──────────────┬────────────┐
 │ Date         │ Models                               │        Input │       Output │ Cache Create │   Cache Read │ Total Tokens │ Cost (USD) │
 ├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-05-27   │ claude-3-7-sonnet-20250219, sonnet-4 │           13 │          105 │       26,879 │       13,386 │       40,383 │      $0.11 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-05-28   │ sonnet-4                             │          362 │       66,396 │      324,646 │    5,521,555 │    5,912,959 │      $3.87 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-05-31   │ sonnet-4                             │        1,529 │        2,317 │       48,443 │      191,538 │      243,827 │      $0.28 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-01   │ sonnet-4                             │          936 │       52,860 │      727,687 │   12,347,133 │   13,128,616 │      $7.23 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-02   │ sonnet-4                             │        1,161 │        3,507 │       50,946 │      274,419 │      330,033 │      $0.33 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-04   │ sonnet-4                             │           27 │       18,772 │       35,924 │      425,789 │      480,512 │      $0.54 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-06   │ sonnet-4                             │           28 │          656 │       22,704 │       53,244 │       76,632 │      $0.11 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-07   │ claude-3-7-sonnet-20250219           │           14 │            4 │       30,906 │       14,111 │       45,035 │      $0.12 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-08   │ claude-3-7-sonnet-20250219, sonnet-4 │       14,712 │      113,179 │    2,483,187 │   41,035,104 │   43,646,182 │     $23.36 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-09   │ sonnet-4                             │          619 │        9,229 │      664,424 │    8,507,926 │    9,182,198 │      $5.18 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-10   │ opus-4, sonnet-4                     │        7,661 │       95,173 │    1,845,031 │   24,151,582 │   26,099,447 │     $48.62 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-11   │ opus-4                               │          309 │        9,805 │      665,540 │    3,917,450 │    4,593,104 │     $19.10 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-12   │ opus-4, sonnet-4                     │        2,033 │       61,655 │    1,205,526 │   22,655,311 │   23,924,525 │     $57.40 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ 2025-06-13   │ opus-4, sonnet-4                     │        4,534 │      138,687 │    4,553,451 │   91,142,729 │   95,839,401 │    $179.09 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
 │ 2025-06-14   │ opus-4, sonnet-4                     │          840 │       25,963 │      684,682 │   19,863,036 │   20,574,521 │     $36.32 │
-├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
-│ ──────────── │ ────────────                         │ ──────────── │ ──────────── │ ──────────── │ ──────────── │ ──────────── │ ────────── │
 ├──────────────┼──────────────────────────────────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────┤
 │ Total        │                                      │       34,778 │      598,308 │   13,369,976 │  230,114,313 │  244,117,375 │    $381.67 │
 └──────────────┴──────────────────────────────────────┴──────────────┴──────────────┴──────────────┴──────────────┴──────────────┴────────────┘
 ```
 
-今日の使用料金を通知バーに表示します。
-通知バーにカーソルを合わせると詳細が表示されます。
+The app displays today's usage cost in the menu bar and shows details on hover.
 
+## Development Guidelines
 
+When working on tasks, create TODO checklists in the @.claude/todos folder and update them as you progress.
+If tasks grow numerous, split them into separate todo files.
+When you have multiple todo files, create a parent todo list that summarizes them.
 
+For application implementation, follow schema-driven development strictly:
+- Design table schemas, API definitions, JSONSchema definitions, and data processing flows first
+- Document these designs before implementation
+- Do not start with UI design
 
-作業を進めるときは @.claude/todos フォルダに TODOチェックリストを作って、更新しながら作業をしてください。
-タスクが増えてきた場合、todoを分割してください。
-複数のtodoがある場合、それをまとめた親todoリストを作ってください。
+## Development Policy
 
+Refer to the following development policy document:
+- `docs/development-policy.md` - Development policy (architecture, tech stack, requirements, etc.)
 
-アプリケーション実装時はスキーマ駆動を徹底してください。
-テーブル定義やAPI定義、JSONSchema定義、データ加工フローを先に考えてドキュメントや部分的な実装に落とし込みます。
-UIを先に考えてはいけません。
-
-
-## 開発方針
-
-このプロジェクトの開発方針は以下のドキュメントを参照してください：
-- `docs/development-policy.md` - 開発方針書（アーキテクチャ、技術スタック、機能要件など）
-
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-
-
-### 設計ドキュメント
-以下の設計ドキュメントを必ず参照してください：
-- `docs/designdoc.md` - システム全体設計書
-- `docs/database-schema.sql` - データベーススキーマ定義
-- `docs/api-spec.yaml` - OpenAPI仕様書
-- `docs/data-flow.md` - データ処理フロー設計
-- `docs/development-tasks.md` - 開発タスク詳細
-- `docs/development-checklist.md` - 開発チェックリスト
+### Design Documents
+Always refer to these design documents:
+- `docs/designdoc.md` - System design specification
+- `docs/database-schema.sql` - Database schema definitions
+- `docs/api-spec.yaml` - OpenAPI specification
+- `docs/data-flow.md` - Data processing flow design
+- `docs/development-tasks.md` - Development task details
+- `docs/development-checklist.md` - Development checklist
 
 ## Repository Structure
 
@@ -95,31 +60,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Process
 
-スキーマ駆動開発に従い、以下の順序で開発を進めます：
+Following schema-driven development, proceed in this order:
 
-1. **設計フェーズ**:
-   - システム全体設計書の作成・更新
-   - データベーススキーマ設計
-   - API仕様書作成
-   - データ処理フロー設計
+1. **Design Phase**:
+   - Create/update system design specification
+   - Design database schema
+   - Create API specification
+   - Design data processing flow
 
-2. **実装フェーズ**:
-   - データベース環境構築
-   - データモデル実装
-   - クローラー実装
-   - APIサーバー実装
-   - フロントエンド実装
+2. **Implementation Phase**:
+   - Set up database environment
+   - Implement data models
+   - Implement crawler
+   - Implement API server
+   - Implement frontend
 
-3. **品質保証**:
-   - ユニットテスト実装
-   - 統合テスト実装
-   - E2Eテスト実装
-   - パフォーマンステスト
+3. **Quality Assurance**:
+   - Implement unit tests
+   - Implement integration tests
+   - Implement E2E tests
+   - Performance testing
 
-4. **デプロイ・運用**:
-   - Docker環境構築
-   - CI/CD設定
-   - 監視・ログ設定
+4. **Deployment & Operations**:
+   - Docker environment setup
+   - CI/CD configuration
+   - Monitoring and logging setup
 
 ## Technology Stack
 
