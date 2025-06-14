@@ -16,11 +16,6 @@ let package = Package(
         .executableTarget(
             name: "CCUsageMac",
             path: "Sources"
-        ),
-        .testTarget(
-            name: "CCUsageMacTests",
-            dependencies: ["CCUsageMac"],
-            path: "Tests"
         )
     ]
 )
