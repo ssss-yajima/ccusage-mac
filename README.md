@@ -23,6 +23,17 @@ ccusage-mac is a macOS menu bar application inspired by [ccusage](https://github
 - macOS 13.0 (Ventura) or later
 - Claude Code must be installed and have usage data
 
+### Download from GitHub Releases (Recommended)
+
+1. Go to [Releases](https://github.com/ssss-yajima/ccusage-mac/releases)
+2. Download the latest `.dmg` or `.zip` file
+3. Open the downloaded file:
+   - **DMG**: Double-click and drag CCUsageMac to Applications
+   - **ZIP**: Double-click to unzip, then move CCUsageMac to Applications
+4. Launch CCUsageMac from Applications folder
+
+**Note**: On first launch, macOS will show a security warning. Go to System Settings > Privacy & Security and click "Open Anyway".
+
 ### Building from Source
 
 1. Clone the repository:
@@ -31,29 +42,21 @@ git clone https://github.com/ssss-yajima/ccusage-mac.git
 cd ccusage-mac
 ```
 
-2. Build with Swift Package Manager:
+2. Build and create app:
 ```bash
-cd CCUsageMac
-swift build -c release
+./scripts/build-local.sh
 ```
 
 3. Run the application:
 ```bash
-.build/release/CCUsageMac
+open release/CCUsageMac.app
 ```
 
-### Installing as an App
+### Auto-start at Login
 
-1. Copy the built binary to your Applications folder
-2. To launch at login: System Settings > General > Login Items
-
-### Homebrew Cask
-
-```bash
-brew install --cask ccusage-mac
-```
-
-*Note: Homebrew installation requires the formula to be accepted into the official Homebrew Cask repository. For now, please build from source or download from GitHub Releases.*
+To launch CCUsageMac automatically when you log in:
+1. Open System Settings > General > Login Items
+2. Click the + button and add CCUsageMac
 
 ## Usage
 
