@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+        
+    - name: Build app
+      run: |
+        cd CCUsageMac
+        swift build -c release
+        
+    - name: Create app bundle
+      run: |
+        mkdir -p CCUsageMac.app/Contents/MacOS
+        mkdir -p CCUsageMac.app/Contents/Resources
+        
+        # Copy binary
+        cp CCUsageMac/.build/release/CCUsageMac CCUsageMac.app/Contents/MacOS/
+        
+        # Create Info.plist
+        cat > CCUsageMac.app/Contents/Info.plist << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleExecutable</key>
+            <string>CCUsageMac</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.yajima.ccusage-mac</string>
+            <key>CFBundleName</key>
+            <string>CCUsageMac</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${GITHUB_REF_NAME#v}</string>
+            <key>CFBundleVersion</key>
+            <string>${GITHUB_REF_NAME#v}</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>13.0</string>
+            <key>LSUIElement</key>
+            <true/>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+        </dict>
+        </plist>
+        EOF
+        
+    - name: Create DMG
+      run: |
+        mkdir dmg-temp
+        cp -R CCUsageMac.app dmg-temp/
+        hdiutil create -volname "CCUsageMac" -srcfolder dmg-temp -ov -format UDZO CCUsageMac-${GITHUB_REF_NAME}.dmg
+        rm -rf dmg-temp
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: CCUsageMac-${{ github.ref_name }}.dmg
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
