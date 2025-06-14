@@ -1,5 +1,9 @@
 # ccusage-mac
 
+<div align="center">
+  <img src="./docs/app-icon.png" width="128" height="128" alt="CCUsageMac Icon">
+</div>
+
 A macOS menu bar app that displays your Claude Code usage costs in real-time.
 
 ![](./docs/image.png)

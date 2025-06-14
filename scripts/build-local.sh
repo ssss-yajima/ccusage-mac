@@ -21,6 +21,11 @@ mkdir -p "$APP_PATH/Contents/Resources"
 # Copy binary
 cp .build/release/CCUsageMac "$APP_PATH/Contents/MacOS/"
 
+# Copy icon if exists
+if [ -f Resources/AppIcon.icns ]; then
+    cp Resources/AppIcon.icns "$APP_PATH/Contents/Resources/"
+fi
+
 # Create Info.plist
 cat > "$APP_PATH/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -33,6 +38,8 @@ cat > "$APP_PATH/Contents/Info.plist" << EOF
     <string>com.yajima.ccusage-mac</string>
     <key>CFBundleName</key>
     <string>CCUsageMac</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleVersion</key>

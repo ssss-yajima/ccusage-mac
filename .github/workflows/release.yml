@@ -35,6 +35,11 @@ jobs:
         # Copy binary
         cp CCUsageMac/.build/release/CCUsageMac CCUsageMac.app/Contents/MacOS/
         
+        # Copy icon if exists
+        if [ -f CCUsageMac/Resources/AppIcon.icns ]; then
+            cp CCUsageMac/Resources/AppIcon.icns CCUsageMac.app/Contents/Resources/
+        fi
+        
         # Create Info.plist
         cat > CCUsageMac.app/Contents/Info.plist << EOF
         <?xml version="1.0" encoding="UTF-8"?>
@@ -47,6 +52,8 @@ jobs:
             <string>com.yajima.ccusage-mac</string>
             <key>CFBundleName</key>
             <string>CCUsageMac</string>
+            <key>CFBundleIconFile</key>
+            <string>AppIcon</string>
             <key>CFBundleShortVersionString</key>
             <string>${GITHUB_REF_NAME#v}</string>
             <key>CFBundleVersion</key>
