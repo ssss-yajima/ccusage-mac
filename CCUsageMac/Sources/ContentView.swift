@@ -11,80 +11,51 @@ struct ContentView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Claude Usage")
-                        .font(.headline)
-                    Text("Today's Usage")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Button(action: { appState.refresh() }) {
-                    Image(systemName: "arrow.clockwise")
-                        .imageScale(.medium)
-                }
-                .buttonStyle(.plain)
-                .disabled(appState.isLoading)
-            }
-            .padding()
-            
-            Divider()
-            
-            // Content
-            if appState.isLoading && appState.todaysUsage == nil {
+        if appState.isLoading && appState.weeklyUsage.isEmpty {
+            // Loading state
+            VStack {
                 ProgressView("Loading usage data...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
-            } else if let error = appState.lastError {
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                        .foregroundColor(.orange)
-                    Text("Error loading data")
-                        .font(.headline)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
-            } else if let usage = appState.todaysUsage {
-                UsageDetailView(usage: usage)
-                    .padding()
-            } else {
-                Text("No data available")
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
             }
-            
-            Divider()
-            
-            // Footer
-            HStack {
-                if let lastUpdate = appState.lastUpdate {
-                    Text("Updated \(lastUpdate, formatter: relativeDateFormatter)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+            .frame(width: 900, height: 500)
+        } else if let error = appState.lastError {
+            // Error state
+            VStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.largeTitle)
+                    .foregroundColor(.orange)
+                Text("Error loading data")
+                    .font(.headline)
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
                 
                 Spacer()
+                    .frame(height: 40)
                 
-                Button("Quit") {
+                HStack {
+                    Button("Retry") {
+                        appState.refresh()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    
+                    Button("Quit") {
+                        NSApplication.shared.terminate(nil)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            .frame(width: 400, height: 300)
+            .padding()
+        } else {
+            // Weekly table view
+            WeeklyTableView(
+                weeklyData: appState.weeklyUsage,
+                onQuit: {
                     NSApplication.shared.terminate(nil)
                 }
-                .buttonStyle(.plain)
-                .font(.caption)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
+            )
         }
-        .frame(width: 350, height: 400)
     }
 }

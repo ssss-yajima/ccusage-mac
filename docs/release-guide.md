@@ -27,23 +27,13 @@ git push origin v1.0.0
 1. 「Releases」タブを開く
 2. 新しいリリースが作成されていることを確認
 3. 以下のファイルがアップロードされています：
-   - `CCUsageMac-v1.0.0.zip` - ZIP形式
    - `CCUsageMac-v1.0.0.dmg` - DMG形式
 
 ## インストール方法（ユーザー向け）
 
-### 方法1: DMGファイルを使用
-
 1. Releases ページから `CCUsageMac-v1.0.0.dmg` をダウンロード
 2. DMGファイルをダブルクリック
 3. `CCUsageMac.app` を Applications フォルダにドラッグ&ドロップ
-4. Applications フォルダから CCUsageMac を起動
-
-### 方法2: ZIPファイルを使用
-
-1. Releases ページから `CCUsageMac-v1.0.0.zip` をダウンロード
-2. ZIPファイルをダブルクリックして解凍
-3. `CCUsageMac.app` を Applications フォルダに移動
 4. Applications フォルダから CCUsageMac を起動
 
 ### 初回起動時の注意
@@ -63,12 +53,7 @@ GitHub Actions を使わずに手動でリリースする場合：
 # 1. ローカルでビルド
 ./scripts/build-local.sh
 
-# 2. ZIP作成
-cd release
-zip -r CCUsageMac-v1.0.0.zip CCUsageMac.app
-cd ..
-
-# 3. DMG作成
+# 2. DMG作成
 mkdir dmg-temp
 cp -R release/CCUsageMac.app dmg-temp/
 hdiutil create -volname "CCUsageMac" -srcfolder dmg-temp -ov -format UDZO CCUsageMac-v1.0.0.dmg

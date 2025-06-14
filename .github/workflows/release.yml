@@ -58,10 +58,6 @@ jobs:
         </plist>
         EOF
         
-    - name: Create ZIP
-      run: |
-        zip -r CCUsageMac-${GITHUB_REF_NAME}.zip CCUsageMac.app
-        
     - name: Create DMG
       run: |
         mkdir dmg-temp
@@ -72,9 +68,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          CCUsageMac-${{ github.ref_name }}.zip
-          CCUsageMac-${{ github.ref_name }}.dmg
+        files: CCUsageMac-${{ github.ref_name }}.dmg
         draft: false
         prerelease: false
         generate_release_notes: true

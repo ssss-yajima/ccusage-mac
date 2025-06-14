@@ -23,7 +23,9 @@ class UsageDataLoader {
         }
         
         let allEntries = try await loadAllJSONLFiles(in: projectsPath)
+        #if DEBUG
         print("DEBUG: Total entries loaded: \(allEntries.count)")
+        #endif
         
         // Use the same date format as ccusage (YYYY-MM-DD)
         let dateFormatter = DateFormatter()
@@ -32,21 +34,58 @@ class UsageDataLoader {
         let todayString = dateFormatter.string(from: today)
         
         let todaysEntries = filterEntriesByDate(allEntries, dateString: todayString)
+        #if DEBUG
         print("DEBUG: Today's entries (\(todayString)): \(todaysEntries.count)")
+        #endif
         
+        #if DEBUG
         // Debug: Show timestamp range
         if !todaysEntries.isEmpty {
             let sortedEntries = todaysEntries.sorted { $0.timestamp < $1.timestamp }
             print("DEBUG: First entry: \(sortedEntries.first!.timestamp)")
             print("DEBUG: Last entry: \(sortedEntries.last!.timestamp)")
         }
+        #endif
         
         let usage = aggregateUsageData(from: todaysEntries, for: today)
+        #if DEBUG
         print("DEBUG: Total cost: $\(String(format: "%.2f", usage.totalCost))")
         print("DEBUG: Token breakdown - Input: \(usage.inputTokens), Output: \(usage.outputTokens), Cache Create: \(usage.cacheCreateTokens), Cache Read: \(usage.cacheReadTokens)")
         print("DEBUG: Models used: \(usage.models.joined(separator: ", "))")
+        #endif
         
         return usage
+    }
+    
+    func loadWeeklyUsage() async throws -> [UsageData] {
+        let today = Date()
+        let projectsPath = claudePath.appendingPathComponent("projects")
+        
+        guard fileManager.fileExists(atPath: projectsPath.path) else {
+            throw UsageError.claudeDirectoryNotFound
+        }
+        
+        let allEntries = try await loadAllJSONLFiles(in: projectsPath)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.timeZone = TimeZone.current
+        
+        var weeklyData: [UsageData] = []
+        
+        // Get data for the last 7 days
+        for daysAgo in 0..<7 {
+            guard let date = calendar.date(byAdding: .day, value: -daysAgo, to: today) else { continue }
+            let dateString = dateFormatter.string(from: date)
+            
+            let dayEntries = filterEntriesByDate(allEntries, dateString: dateString)
+            let usage = aggregateUsageData(from: dayEntries, for: date)
+            
+            weeklyData.append(usage)
+        }
+        
+        // Sort by date ascending (oldest first)
+        return weeklyData.reversed()
     }
     
     private func loadAllJSONLFiles(in directory: URL) async throws -> [JSONLEntry] {
@@ -66,7 +105,9 @@ class UsageDataLoader {
                 allEntries.append(contentsOf: entries)
             } catch {
                 // Skip files that can't be read
+                #if DEBUG
                 print("Failed to load file: \(fileURL.lastPathComponent)")
+                #endif
             }
         }
         
@@ -109,9 +150,11 @@ class UsageDataLoader {
         return entries.filter { entry in
             guard let entryDate = iso8601Formatter.date(from: entry.timestamp) else {
                 // Only print first few failures to avoid spam
+                #if DEBUG
                 if foundCount < 5 {
                     print("DEBUG: Failed to parse timestamp: \(entry.timestamp)")
                 }
+                #endif
                 return false
             }
             
@@ -121,9 +164,11 @@ class UsageDataLoader {
             
             if matches {
                 foundCount += 1
+                #if DEBUG
                 if foundCount <= 5 {
                     print("DEBUG: Found entry #\(foundCount): \(entry.timestamp) -> \(entryDateString)")
                 }
+                #endif
             }
             
             return matches
@@ -140,7 +185,9 @@ class UsageDataLoader {
         
         // Remove duplicates based on requestId or message.id
         let uniqueEntries = removeDuplicates(from: entries)
+        #if DEBUG
         print("DEBUG: Entries after deduplication: \(uniqueEntries.count) (removed \(entries.count - uniqueEntries.count) duplicates)")
+        #endif
         
         var modelCosts: [String: Double] = [:]
         var skippedSynthetic = 0
@@ -188,15 +235,19 @@ class UsageDataLoader {
         
         let totalTokens = inputTokens + outputTokens + cacheCreateTokens + cacheReadTokens
         
+        #if DEBUG
         if skippedSynthetic > 0 {
             print("DEBUG: Skipped \(skippedSynthetic) synthetic model entries")
         }
+        #endif
         
+        #if DEBUG
         // Debug: print cost breakdown by model
         print("DEBUG: Cost breakdown by model:")
         for (model, cost) in modelCosts.sorted(by: { $0.key < $1.key }) {
             print("  \(model): $\(String(format: "%.2f", cost))")
         }
+        #endif
         
         return UsageData(
             date: date,

@@ -19,6 +19,7 @@ struct CCUsageMacApp: App {
 class AppState: ObservableObject {
     @Published var todaysCost: String = "$0.00"
     @Published var todaysUsage: UsageData?
+    @Published var weeklyUsage: [UsageData] = []
     @Published var isLoading: Bool = false
     @Published var lastError: String?
     @Published var lastUpdate: Date?
@@ -45,8 +46,12 @@ class AppState: ObservableObject {
             lastError = nil
             
             do {
+                // Load both today's and weekly data
                 let usage = try await usageLoader.loadTodaysUsage()
+                let weekly = try await usageLoader.loadWeeklyUsage()
+                
                 self.todaysUsage = usage
+                self.weeklyUsage = weekly
                 self.todaysCost = formatCost(usage.totalCost)
                 self.lastUpdate = Date()
             } catch {

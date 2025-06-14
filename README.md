@@ -26,10 +26,8 @@ ccusage-mac is a macOS menu bar application inspired by [ccusage](https://github
 ### Download from GitHub Releases (Recommended)
 
 1. Go to [Releases](https://github.com/ssss-yajima/ccusage-mac/releases)
-2. Download the latest `.dmg` or `.zip` file
-3. Open the downloaded file:
-   - **DMG**: Double-click and drag CCUsageMac to Applications
-   - **ZIP**: Double-click to unzip, then move CCUsageMac to Applications
+2. Download the latest `.dmg` file
+3. Double-click the DMG and drag CCUsageMac to Applications
 4. Launch CCUsageMac from Applications folder
 
 **Note**: On first launch, macOS will show a security warning. Go to System Settings > Privacy & Security and click "Open Anyway".

@@ -51,15 +51,12 @@ app: build
 	@echo "App bundle created at: $(APP_PATH)"
 
 release: app
-	@echo "Creating release files..."
-	@cd $(RELEASE_DIR) && zip -r "$(APP_NAME)-v$(VERSION).zip" $(APP_NAME).app
+	@echo "Creating DMG file..."
 	@mkdir -p dmg-temp
 	@cp -R $(APP_PATH) dmg-temp/
 	@hdiutil create -volname "$(APP_NAME)" -srcfolder dmg-temp -ov -format UDZO "$(RELEASE_DIR)/$(APP_NAME)-v$(VERSION).dmg"
 	@rm -rf dmg-temp
-	@echo "Release files created:"
-	@echo "  - $(RELEASE_DIR)/$(APP_NAME)-v$(VERSION).zip"
-	@echo "  - $(RELEASE_DIR)/$(APP_NAME)-v$(VERSION).dmg"
+	@echo "DMG created: $(RELEASE_DIR)/$(APP_NAME)-v$(VERSION).dmg"
 
 clean:
 	@echo "Cleaning build artifacts..."
