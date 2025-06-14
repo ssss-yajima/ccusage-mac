@@ -30,7 +30,12 @@ ccusage-mac is a macOS menu bar application inspired by [ccusage](https://github
 3. Double-click the DMG and drag CCUsageMac to Applications
 4. Launch CCUsageMac from Applications folder
 
-**Note**: On first launch, macOS will show a security warning. Go to System Settings > Privacy & Security and click "Open Anyway".
+**Important Security Note**: 
+- On first launch, macOS may show a security warning since the app is not notarized
+- Right-click (or Control-click) on the app and select "Open" from the context menu
+- Click "Open" in the dialog that appears
+- Alternatively, go to System Settings > Privacy & Security and click "Open Anyway"
+- You only need to do this once on first launch
 
 ### Building from Source
 
