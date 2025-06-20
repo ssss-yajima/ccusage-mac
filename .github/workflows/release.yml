@@ -78,12 +78,113 @@ jobs:
         hdiutil create -volname "CCUsageMac" -srcfolder dmg-temp -ov -format UDZO CCUsageMac-${GITHUB_REF_NAME}.dmg
         rm -rf dmg-temp
         
+    - name: Generate Release Notes
+      id: release-notes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const tag = context.ref.replace('refs/tags/', '');
+          const { data: previousTags } = await github.rest.repos.listTags({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 2
+          });
+          
+          let previousTag = null;
+          if (previousTags.length > 1) {
+            // Current tag is at index 0, previous is at index 1
+            previousTag = previousTags[1].name;
+          }
+          
+          // Get commits between tags
+          const commits = previousTag ? await github.rest.repos.compareCommits({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            base: previousTag,
+            head: tag
+          }) : null;
+          
+          // Get PRs merged since last release
+          const prs = [];
+          if (commits) {
+            for (const commit of commits.data.commits) {
+              const prsForCommit = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: commit.sha
+              });
+              prs.push(...prsForCommit.data);
+            }
+          }
+          
+          // Remove duplicates
+          const uniquePrs = Array.from(new Map(prs.map(pr => [pr.number, pr])).values());
+          
+          // Categorize PRs by labels
+          const features = [];
+          const bugfixes = [];
+          const others = [];
+          const breaking = [];
+          
+          for (const pr of uniquePrs) {
+            const labels = pr.labels.map(l => l.name);
+            if (labels.includes('breaking-change')) {
+              breaking.push(pr);
+            } else if (labels.includes('feature') || labels.includes('enhancement')) {
+              features.push(pr);
+            } else if (labels.includes('bug') || labels.includes('fix')) {
+              bugfixes.push(pr);
+            } else {
+              others.push(pr);
+            }
+          }
+          
+          // Build release notes
+          let notes = `## What's Changed in ${tag}\n\n`;
+          
+          if (breaking.length > 0) {
+            notes += `### ⚠️ Breaking Changes\n`;
+            breaking.forEach(pr => {
+              notes += `- ${pr.title} by @${pr.user.login} in #${pr.number}\n`;
+            });
+            notes += '\n';
+          }
+          
+          if (features.length > 0) {
+            notes += `### ✨ New Features\n`;
+            features.forEach(pr => {
+              notes += `- ${pr.title} by @${pr.user.login} in #${pr.number}\n`;
+            });
+            notes += '\n';
+          }
+          
+          if (bugfixes.length > 0) {
+            notes += `### 🐛 Bug Fixes\n`;
+            bugfixes.forEach(pr => {
+              notes += `- ${pr.title} by @${pr.user.login} in #${pr.number}\n`;
+            });
+            notes += '\n';
+          }
+          
+          if (others.length > 0) {
+            notes += `### 📚 Other Changes\n`;
+            others.forEach(pr => {
+              notes += `- ${pr.title} by @${pr.user.login} in #${pr.number}\n`;
+            });
+            notes += '\n';
+          }
+          
+          notes += `\n**Full Changelog**: https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${previousTag || ''}...${tag}`;
+          
+          return notes;
+        result-encoding: string
+    
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: CCUsageMac-${{ github.ref_name }}.dmg
         draft: false
         prerelease: false
-        generate_release_notes: true
+        body: ${{ steps.release-notes.outputs.result }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
