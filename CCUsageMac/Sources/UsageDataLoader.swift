@@ -8,10 +8,10 @@ class UsageDataLoader {
         cal.timeZone = TimeZone.current
         return cal
     }()
+    private let settings = AppSettings.shared
     
     private var claudePath: URL {
-        let homeDir = fileManager.homeDirectoryForCurrentUser
-        return homeDir.appendingPathComponent(".claude")
+        return settings.claudeDataURL
     }
     
     func loadTodaysUsage() async throws -> UsageData {
