@@ -34,8 +34,8 @@ class AppState: ObservableObject {
     func startAutoUpdate() {
         loadUsageData()
         
-        // Update every 5 minutes
-        timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+        // Update every 1 minute
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
             self.loadUsageData()
         }
     }

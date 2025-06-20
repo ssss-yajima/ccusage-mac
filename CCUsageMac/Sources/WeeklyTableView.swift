@@ -30,36 +30,48 @@ struct WeeklyTableView: View {
                 
                 Button(action: { appState.refresh() }) {
                     Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 14))
                 }
                 .buttonStyle(.plain)
                 .disabled(appState.isLoading)
+                .help("Refresh usage data")
             }
-            .padding()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(Color(NSColor.controlBackgroundColor))
+            
+            Divider()
             
             // Table
             ScrollView {
                 VStack(spacing: 0) {
                     // Table Header
                     TableHeaderRow()
+                        .padding(.horizontal, 20)
                     
                     // Table Body
                     ForEach(weeklyData, id: \.date) { usage in
                         TableDataRow(usage: usage, 
                                    dateFormatter: dateFormatter,
                                    numberFormatter: numberFormatter)
+                            .padding(.horizontal, 20)
                     }
                     
                     // Separator
                     Rectangle()
                         .fill(Color.gray.opacity(0.3))
                         .frame(height: 1)
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 20)
                     
                     // Total Row
                     TotalRow(weeklyData: weeklyData, numberFormatter: numberFormatter)
+                        .padding(.horizontal, 20)
                 }
-                .padding(.horizontal)
+                .padding(.vertical, 12)
             }
+            
+            Divider()
             
             // Footer with Settings and Quit buttons
             HStack {
@@ -83,9 +95,12 @@ struct WeeklyTableView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
             }
-            .padding()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(Color(NSColor.controlBackgroundColor))
         }
-        .frame(width: 900, height: 500)
+        .frame(width: 940, height: 520)
+        .background(Color(NSColor.windowBackgroundColor))
         .sheet(isPresented: $showingSettings) {
             SettingsView()
         }
@@ -121,8 +136,10 @@ struct TableHeaderRow: View {
         }
         .font(.system(.caption, design: .monospaced))
         .bold()
-        .padding(.vertical, 8)
-        .background(Color.gray.opacity(0.1))
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(6)
     }
 }
 
@@ -130,6 +147,7 @@ struct TableDataRow: View {
     let usage: UsageData
     let dateFormatter: DateFormatter
     let numberFormatter: NumberFormatter
+    @State private var isHovered = false
     
     var body: some View {
         HStack(spacing: 0) {
@@ -140,32 +158,43 @@ struct TableDataRow: View {
                 .frame(width: 200, alignment: .leading)
                 .lineLimit(1)
                 .truncationMode(.tail)
+                .help(usage.models.joined(separator: ", "))
             
             Text(formatNumber(usage.inputTokens))
                 .frame(width: 90, alignment: .trailing)
+                .foregroundColor(usage.inputTokens > 0 ? .primary : .secondary)
             
             Text(formatNumber(usage.outputTokens))
                 .frame(width: 90, alignment: .trailing)
+                .foregroundColor(usage.outputTokens > 0 ? .primary : .secondary)
             
             Text(formatNumber(usage.cacheCreateTokens))
                 .frame(width: 110, alignment: .trailing)
+                .foregroundColor(usage.cacheCreateTokens > 0 ? .primary : .secondary)
             
             Text(formatNumber(usage.cacheReadTokens))
                 .frame(width: 110, alignment: .trailing)
+                .foregroundColor(usage.cacheReadTokens > 0 ? .primary : .secondary)
             
             Text(formatNumber(usage.totalTokens))
                 .frame(width: 110, alignment: .trailing)
+                .fontWeight(usage.totalTokens > 0 ? .medium : .regular)
             
             Text("$\(String(format: "%.2f", usage.totalCost))")
                 .frame(width: 90, alignment: .trailing)
+                .foregroundColor(usage.totalCost > 0 ? .primary : .secondary)
+                .fontWeight(usage.totalCost > 0 ? .medium : .regular)
         }
         .font(.system(.caption, design: .monospaced))
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
         .background(
-            Rectangle()
-                .fill(Color.gray.opacity(0.05))
-                .opacity(usage.totalCost > 0 ? 1 : 0)
+            RoundedRectangle(cornerRadius: 4)
+                .fill(isHovered ? Color.accentColor.opacity(0.1) : (usage.totalCost > 0 ? Color.gray.opacity(0.05) : Color.clear))
         )
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
     
     private func formatModels(_ models: [String]) -> String {
@@ -238,8 +267,12 @@ struct TotalRow: View {
                 .bold()
         }
         .font(.system(.caption, design: .monospaced))
-        .padding(.vertical, 8)
-        .background(Color.gray.opacity(0.1))
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(NSColor.controlBackgroundColor))
+        )
     }
     
     private func formatNumber(_ number: Int) -> String {
