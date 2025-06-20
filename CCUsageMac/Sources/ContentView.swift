@@ -20,34 +20,44 @@ struct ContentView: View {
             .frame(width: 900, height: 500)
         } else if let error = appState.lastError {
             // Error state
-            VStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.largeTitle)
-                    .foregroundColor(.orange)
-                Text("Error loading data")
-                    .font(.headline)
-                Text(error)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                
+            VStack(spacing: 16) {
                 Spacer()
-                    .frame(height: 40)
                 
-                HStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 48))
+                    .foregroundColor(.orange)
+                    .symbolRenderingMode(.hierarchical)
+                
+                VStack(spacing: 8) {
+                    Text("Error loading data")
+                        .font(.headline)
+                    
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 300)
+                }
+                
+                HStack(spacing: 12) {
                     Button("Retry") {
                         appState.refresh()
                     }
                     .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                     
                     Button("Quit") {
                         NSApplication.shared.terminate(nil)
                     }
                     .buttonStyle(.bordered)
+                    .controlSize(.large)
                 }
+                .padding(.top, 8)
+                
+                Spacer()
             }
-            .frame(width: 400, height: 300)
-            .padding()
+            .frame(width: 450, height: 350)
+            .padding(40)
         } else {
             // Weekly table view
             WeeklyTableView(
