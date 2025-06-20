@@ -4,6 +4,7 @@ struct SettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
     @State private var tempPath: String = ""
     @State private var validationError: String? = nil
+    @State private var validationWarning: String? = nil
     @State private var showingFileDialog = false
     @Environment(\.dismiss) private var dismiss
     
@@ -19,7 +20,12 @@ struct SettingsView: View {
                 
                 HStack {
                     TextField("Enter path (e.g., ~/.claude)", text: $tempPath)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textFieldStyle(.roundedBorder)
+                        .disabled(false)  // 明示的に編集可能にする
+                        .textSelection(.enabled)  // テキスト選択を有効化
+                        .onSubmit {
+                            validatePath()
+                        }
                         .onChange(of: tempPath) { _ in
                             validatePath()
                         }
@@ -27,6 +33,7 @@ struct SettingsView: View {
                     Button("Browse...") {
                         showingFileDialog = true
                     }
+                    .buttonStyle(.bordered)
                 }
                 
                 if let error = validationError {
@@ -37,6 +44,12 @@ struct SettingsView: View {
                     Text("✓ Valid path")
                         .font(.caption)
                         .foregroundColor(.green)
+                    
+                    if let warning = validationWarning {
+                        Text(warning)
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
                 }
                 
                 Text("Default: ~/.claude")
@@ -94,6 +107,7 @@ struct SettingsView: View {
     private func validatePath() {
         guard !tempPath.isEmpty else {
             validationError = nil
+            validationWarning = nil
             return
         }
         
@@ -104,6 +118,7 @@ struct SettingsView: View {
         // Check if path exists
         guard fileManager.fileExists(atPath: url.path) else {
             validationError = "Path does not exist"
+            validationWarning = nil
             return
         }
         
@@ -112,6 +127,7 @@ struct SettingsView: View {
         fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
         guard isDirectory.boolValue else {
             validationError = "Path is not a directory"
+            validationWarning = nil
             return
         }
         
@@ -119,10 +135,32 @@ struct SettingsView: View {
         let projectsPath = url.appendingPathComponent("projects")
         guard fileManager.fileExists(atPath: projectsPath.path) else {
             validationError = "No 'projects' subdirectory found"
+            validationWarning = nil
             return
         }
         
         validationError = nil
+        
+        // Check for JSONL files
+        var hasJSONLFiles = false
+        if let enumerator = fileManager.enumerator(
+            at: projectsPath,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) {
+            for case let fileURL as URL in enumerator {
+                if fileURL.pathExtension == "jsonl" {
+                    hasJSONLFiles = true
+                    break
+                }
+            }
+        }
+        
+        if !hasJSONLFiles {
+            validationWarning = "⚠️ No JSONL files found in projects directory"
+        } else {
+            validationWarning = nil
+        }
     }
     
     private func saveSettings() {
