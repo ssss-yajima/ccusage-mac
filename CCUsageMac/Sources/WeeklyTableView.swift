@@ -4,6 +4,7 @@ struct WeeklyTableView: View {
     @EnvironmentObject var appState: AppState
     let weeklyData: [UsageData]
     let onQuit: () -> Void
+    @State private var showingSettings = false
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -60,7 +61,7 @@ struct WeeklyTableView: View {
                 .padding(.horizontal)
             }
             
-            // Footer with Quit button
+            // Footer with Settings and Quit buttons
             HStack {
                 if let lastUpdate = appState.lastUpdate {
                     Text("Updated \(lastUpdate, style: .relative) ago")
@@ -69,6 +70,12 @@ struct WeeklyTableView: View {
                 }
                 
                 Spacer()
+                
+                Button("Settings") {
+                    showingSettings = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
                 
                 Button("Quit") {
                     onQuit()
@@ -79,6 +86,9 @@ struct WeeklyTableView: View {
             .padding()
         }
         .frame(width: 900, height: 500)
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+        }
     }
 }
 
